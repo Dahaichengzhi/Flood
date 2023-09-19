@@ -94,7 +94,9 @@ class Trainer(object):
 
         raise NotImplementedError
 
-    def train(self, args, gpu_id, rank, loader, valid_loader,model, optimizer, scheduler):
+    # 增量预训练不用valid_loader
+    def train(self, args, gpu_id, rank, loader, model, optimizer, scheduler):
+    # def train(self, args, gpu_id, rank, loader, valid_loader,model, optimizer, scheduler):
         model.train()
 
         loader_iter = iter(loader)
@@ -129,14 +131,14 @@ class Trainer(object):
 
                     #增量预训练时，不使用prompt,
 
-                    pt_emb = model.embedding.word_embedding.weight.data.clone()
-                    mask = np.zeros((model.embedding.word_embedding.weight.data.size()[0], 1))
-                    mask = torch.from_numpy(mask).to(torch.float32).to(device="cuda")
-                    mask[1:9] += 1#字表中[unused1]-[unused8]
+                    # pt_emb = model.embedding.word_embedding.weight.data.clone()
+                    # mask = np.zeros((model.embedding.word_embedding.weight.data.size()[0], 1))
+                    # mask = torch.from_numpy(mask).to(torch.float32).to(device="cuda")
+                    # mask[1:9] += 1#字表中[unused1]-[unused8]
 
                     optimizer.step()
                     #只更新prompt参数
-                    model.embedding.word_embedding.weight.data = model.embedding.word_embedding.weight.data * mask + pt_emb * (1 - mask)
+                    # model.embedding.word_embedding.weight.data = model.embedding.word_embedding.weight.data * mask + pt_emb * (1 - mask)
 
                     scheduler.step()
                     model.zero_grad()
@@ -145,7 +147,8 @@ class Trainer(object):
                     (not self.dist_train or (self.dist_train and rank == 0)):
                 self.report_and_reset_stats()
                 self.start_time = time.time()
-                self.evaluate(gpu_id, valid_loader, model)
+                # 增量预训练不用evaluate
+                # self.evaluate(gpu_id, valid_loader, model)
 
 
 
@@ -543,7 +546,9 @@ def worker(proc_id, gpu_ranks, args, model):
         else:
             print("Worker is training ...")
 
-    valid_loader = str2dataloader[args.target](args, args.dataset_valid_path, args.batch_size, 0, 1, True)
+    # 增量预训练不用valid_loader
+    # valid_loader = str2dataloader[args.target](args, args.dataset_valid_path, args.batch_size, 0, 1, True)
 
     trainer = str2trainer[args.target](args)
-    trainer.train(args, gpu_id, rank, train_loader, valid_loader,model, optimizer, scheduler)
+    trainer.train(args, gpu_id, rank, train_loader, model, optimizer, scheduler)
+    # trainer.train(args, gpu_id, rank, train_loader, valid_loader,model, optimizer, scheduler)
