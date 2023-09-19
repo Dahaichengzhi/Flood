@@ -578,21 +578,25 @@ class LmDataset(Dataset):
                 pos += 1
 
                 #读训练数据
-                line = line.rstrip().split(' ', 3)
-                document_q = self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(line[0]))
-                document_c = self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(line[1]))
-                document_a = self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(line[2]))
+                # line = line.rstrip().split(' ', 3)
+                # document_q = self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(line[0]))
+                # document_c = self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(line[1]))
+                # document_a = self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(line[2]))
 
 
                 #[unused1]-[unused8]
-                desc = ['[unused%s]' % i for i in range(1, 9)]
+                # desc = ['[unused%s]' % i for i in range(1, 9)]
+                #
+                # desc_ids = self.tokenizer.convert_tokens_to_ids(desc)
+                #
+                # #根据模板修改，增量预训练只需要cls+line+sep
+                # document = [self.vocab.get(CLS_TOKEN)] + desc_ids[:4] + document_q + [
+                #     self.vocab.get(SEP_TOKEN)] + document_c + desc_ids[4:] + document_a + [
+                #                self.vocab.get(SEP_TOKEN)]
 
-                desc_ids = self.tokenizer.convert_tokens_to_ids(desc)
-
-                #根据模板修改，增量预训练只需要cls+line+sep
-                document = [self.vocab.get(CLS_TOKEN)] + desc_ids[:4] + document_q + [
-                    self.vocab.get(SEP_TOKEN)] + document_c + desc_ids[4:] + document_a + [
-                               self.vocab.get(SEP_TOKEN)]
+                # 增量预训练
+                line_new = self.tokenizer.tokenize(line.rstrip())
+                document = [self.vocab.get(CLS_TOKEN)] + self.tokenizer.convert_tokens_to_ids(line_new) + [self.vocab.get(SEP_TOKEN)]
 
 
                 instances_num = len(document) // (self.seq_length + 1)
