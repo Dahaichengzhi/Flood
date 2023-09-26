@@ -578,7 +578,7 @@ class LmDataset(Dataset):
                 pos += 1
 
                 #读训练数据
-                # line = line.rstrip().split(' ', 3)
+                # line = line.rstrip().split(' ', 2)
                 # document_q = self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(line[0]))
                 # document_c = self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(line[1]))
                 # document_a = self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(line[2]))
